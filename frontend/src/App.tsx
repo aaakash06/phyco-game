@@ -1,37 +1,39 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import Ball from "./utils/Ball";
+import { useEffect, useRef, useState } from "react";
+
+import BallManager from "./utils/BallManager";
+
+export const canvasHeight = 800;
+export const canvasWidth = 800;
+
 const Home = () => {
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null | undefined>(
     null
   );
 
-  // const [ball, setBall] = useState<Ball | null>(null);
+  const [ballManager, setBallManager] = useState<BallManager | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useEffect(() => {
     if (!canvasRef) return;
     const ctx = canvasRef.current?.getContext("2d");
     setCtx(ctx);
-  }, [canvasRef]);
+    setBallManager(new BallManager(ctx));
+  }, [ctx]);
 
   return (
     <div className="flex justify-between items-center">
       <canvas
         ref={canvasRef}
-        width={500}
-        height={500}
-        style={{ backgroundColor: "gray" }}
+        width={canvasWidth}
+        height={canvasHeight}
+        style={{ backgroundColor: " gray" }}
       ></canvas>
       <button
         className="bg-black text-white"
         onClick={() => {
-          new Ball(100, 100, ctx);
-          // setBall(ball);
-          // ball.draw();
-          // update();
-          // requestAnimationFrame(update);
+          ballManager?.addBall(100, 100);
         }}
       >
         Drop a Ball

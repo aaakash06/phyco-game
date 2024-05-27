@@ -1,4 +1,5 @@
-const RADIUS = 40;
+import { canvasHeight, canvasWidth } from "../App";
+const RADIUS = 5;
 
 export default class Ball {
   x: number;
@@ -20,8 +21,6 @@ export default class Ball {
     this.vy = 2;
     this.ctx = ctx;
     this.update = this.update.bind(this); // Bind the update function
-    this.draw();
-    this.update();
   }
 
   draw() {
@@ -36,24 +35,21 @@ export default class Ball {
   update() {
     if (!this.ctx) return;
 
-    this.ctx.clearRect(0, 0, 500, 500);
-    const isHittingLower = this.y + RADIUS > 500;
-    const isHittingUpper = this.y - RADIUS < 0;
+    // this.ctx.clearRect(0, 0, canvasWidth, canvasWidth);
+
+    if (this.y + RADIUS > canvasHeight) {
+      this.y = canvasHeight - RADIUS;
+    } else if (this.y - RADIUS < 0) {
+      this.y = RADIUS;
+    }
+    const isHittingLower = this.y + RADIUS >= canvasHeight;
+    const isHittingUpper = this.y - RADIUS <= 0;
     if (isHittingLower || isHittingUpper) {
-      this.vy = -this.vy;
-    }
+      this.vy = -this.vy + 0.2;
+    } else this.vy += 0.2;
 
-    this.vy += 0.2;
-
-    if (isHittingLower) {
-      this.y = 500 - RADIUS;
-    } else if (isHittingUpper) {
-      this.y = 50;
-    } else {
-      this.y += this.vy;
-    }
     this.y += this.vy;
     this.draw();
-    requestAnimationFrame(this.update);
+    // requestAnimationFrame(this.update);
   }
 }
