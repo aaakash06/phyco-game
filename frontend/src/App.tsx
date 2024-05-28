@@ -33,7 +33,8 @@ const Home = () => {
       <button
         className="bg-black text-white"
         onClick={() => {
-          ballManager?.addBall(100, 100);
+          const x = (Math.random() * 1000) % 800;
+          ballManager?.addBall(x, 200);
         }}
       >
         Drop a Ball

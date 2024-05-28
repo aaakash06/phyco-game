@@ -1,5 +1,6 @@
 import { canvasHeight, canvasWidth } from "../App";
-const RADIUS = 5;
+import { obstacleRadius } from "./BallManager";
+const RADIUS = 10;
 
 export default class Ball {
   x: number;
@@ -8,11 +9,13 @@ export default class Ball {
   vx: number;
   vy: number;
   ctx: CanvasRenderingContext2D | null | undefined;
+  obstacles: { x: number; y: number }[];
 
   constructor(
     x: number,
     y: number,
-    ctx: CanvasRenderingContext2D | null | undefined
+    ctx: CanvasRenderingContext2D | null | undefined,
+    obstacles: { x: number; y: number }[]
   ) {
     this.x = x;
     this.y = y;
@@ -21,6 +24,7 @@ export default class Ball {
     this.vy = 2;
     this.ctx = ctx;
     this.update = this.update.bind(this); // Bind the update function
+    this.obstacles = obstacles;
   }
 
   draw() {
@@ -35,21 +39,42 @@ export default class Ball {
   update() {
     if (!this.ctx) return;
 
-    // this.ctx.clearRect(0, 0, canvasWidth, canvasWidth);
+    //if inside the obstacles, then shift it
+    this.obstacles.forEach((obstacle) => {
+      const xObst = obstacle.x;
+      const yObst = obstacle.y;
+      const centDiff = obstacleRadius + RADIUS;
+      const distance = Math.hypot(xObst - this.x, yObst - this.y);
+      if (distance <= centDiff) {
+        const angle = Math.atan((yObst - this.y) / (xObst - this.x));
+        const speed = Math.hypot(this.vx, this.vy);
+        this.vx = speed * Math.cos(angle) * 0.05;
+        this.vy = speed * Math.sin(angle) * 0.3;
+      }
+      if (distance < centDiff) {
+        const angle = Math.atan((yObst - this.y) / (xObst - this.x));
+        this.vx += Math.cos(angle) * (centDiff - distance);
+        this.vy += Math.sin(angle) * (centDiff - distance);
+      }
+    });
 
+    //if insider the floors, then shift it.
     if (this.y + RADIUS > canvasHeight) {
       this.y = canvasHeight - RADIUS;
     } else if (this.y - RADIUS < 0) {
       this.y = RADIUS;
     }
+
+    // if coliding the upper or lower level, inverse the velocity
     const isHittingLower = this.y + RADIUS >= canvasHeight;
     const isHittingUpper = this.y - RADIUS <= 0;
     if (isHittingLower || isHittingUpper) {
-      this.vy = -this.vy + 0.2;
-    } else this.vy += 0.2;
+      this.vy = -this.vy;
+    }
 
+    // normal speed and postition change
+    this.vy += 0.2;
     this.y += this.vy;
-    this.draw();
-    // requestAnimationFrame(this.update);
+    this.x += this.vx;
   }
 }
