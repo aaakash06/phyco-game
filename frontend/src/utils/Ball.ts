@@ -1,6 +1,6 @@
 import { canvasHeight, canvasWidth } from "../App";
 import { obstacleRadius } from "./BallManager";
-const RADIUS = 10;
+const RADIUS = 6;
 
 export default class Ball {
   x: number;
@@ -41,22 +41,49 @@ export default class Ball {
 
     //if inside the obstacles, then shift it
     this.obstacles.forEach((obstacle) => {
-      const xObst = obstacle.x;
-      const yObst = obstacle.y;
-      const centDiff = obstacleRadius + RADIUS;
-      const distance = Math.hypot(xObst - this.x, yObst - this.y);
-      if (distance <= centDiff) {
-        const angle = Math.atan((yObst - this.y) / (xObst - this.x));
-        const speed = Math.hypot(this.vx, this.vy);
-        this.vx = speed * Math.cos(angle) * 0.05;
-        this.vy = speed * Math.sin(angle) * 0.3;
-      }
-      if (distance < centDiff) {
-        const angle = Math.atan((yObst - this.y) / (xObst - this.x));
-        this.vx += Math.cos(angle) * (centDiff - distance);
-        this.vy += Math.sin(angle) * (centDiff - distance);
+      // const xObst = obstacle.x;
+      // const yObst = obstacle.y;
+      // const centDiff = obstacleRadius + RADIUS;
+      // const distance = Math.hypot(xObst - this.x, yObst - this.y);
+      // if (distance < centDiff) {
+      //   const angle = Math.atan((yObst - this.y) / (xObst - this.x));
+      //   this.x += Math.cos(angle) * (centDiff - distance);
+      //   this.y += Math.sin(angle) * (centDiff - distance);
+      // }
+
+      // if (distance <= centDiff) {
+      //   const angleWithHorizontal = Math.atan2(yObst - this.y, xObst - this.x);
+      //   const speed = Math.hypot(this.vx, this.vy);
+      //   const velocityAngle = Math.atan2(this.vy, this.vx);
+      //   const finalVelocityAngle =
+      //     Math.PI - (2 * angleWithHorizontal + velocityAngle);
+
+      //   this.vx = -speed * Math.cos(finalVelocityAngle) * 0.4;
+      //   this.vy = speed * Math.sin(finalVelocityAngle) * 0.2;
+      //   // this.vx = -this.vx * 0.4;
+      //   // this.vy = -this.vy * 0.8;
+      // }
+
+      const dist = Math.hypot(this.x - obstacle.x, this.y - obstacle.y);
+      if (dist < this.radius + obstacleRadius) {
+        // Calculate collision angle
+        const angle = Math.atan2(this.y - obstacle.y, this.x - obstacle.x);
+        // Reflect velocity
+        const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+        this.vx = Math.cos(angle) * speed * 0.4;
+        this.vy = Math.sin(angle) * speed * 0.8;
+
+        // Adjust position to prevent sticking
+        const overlap = this.radius + obstacleRadius - dist;
+        this.x += Math.cos(angle) * overlap;
+        this.y += Math.sin(angle) * overlap;
       }
     });
+
+    // normal speed and postition change
+    this.vy += 0.1;
+    this.y += this.vy;
+    this.x += this.vx;
 
     //if insider the floors, then shift it.
     if (this.y + RADIUS > canvasHeight) {
@@ -71,10 +98,5 @@ export default class Ball {
     if (isHittingLower || isHittingUpper) {
       this.vy = -this.vy;
     }
-
-    // normal speed and postition change
-    this.vy += 0.2;
-    this.y += this.vy;
-    this.x += this.vx;
   }
 }

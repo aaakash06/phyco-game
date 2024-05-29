@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import BallManager from "./utils/BallManager";
+import BallManager, {
+  obstacleRadius,
+  obstacleSpacing,
+} from "./utils/BallManager";
 
 export const canvasHeight = 800;
 export const canvasWidth = 800;
@@ -33,7 +36,9 @@ const Home = () => {
       <button
         className="bg-black text-white"
         onClick={() => {
-          const x = (Math.random() * 1000) % 800;
+          // const x = (Math.random() * 1000) % 800;
+          const x =
+            canvasWidth / 2 + (Math.random() - 0.5) * obstacleSpacing * 2;
           ballManager?.addBall(x, 200);
         }}
       >
